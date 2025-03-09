@@ -37,9 +37,9 @@ python main.py
 ## 📷 Capturas de Tela
 (Tela inicial, gameplay e tela de game over ) (EM DESENVOLVIMENTO)
 
-![Tela Inicial](imgs\Tela Inicial.PNG)
+![Tela Inicial](imgs/Tela%Inicial.PNG)
 <!-- ![Gameplay](images/gameplay.png) -->
-![Game Over](imgs\Game Over.PNG)
+![Game Over](imgs/Game%Over.PNG)
 
 
 ## 🤖 Objetivo com IA
