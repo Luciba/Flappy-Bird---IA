@@ -250,7 +250,7 @@ def app(canvas):
         canvas.blit(text_title, (GAME_WIDTH//2 - text_title.get_width()//2, 10))
         canvas.blit(text_play, (GAME_WIDTH//2 - text_play.get_width()//2, 350))
         canvas.blit(text_exit, (GAME_WIDTH//2 - text_exit.get_width()//2, 420))
-        print(text_title.get_width())        
+        
 
         pygame.display.update()
 
