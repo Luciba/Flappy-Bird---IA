@@ -236,7 +236,8 @@ def main():
             draw_screen(canvas, birds, pipes, floor, score)
 
             if len(birds) == 0:
-                break
+                if not game_over(canvas, score):
+                    break
 
 def app(canvas):
     loop = True
@@ -264,6 +265,34 @@ def app(canvas):
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     quit()
+
+def game_over(canvas, score):
+    loop = True
+    while loop:
+        canvas.fill((0, 0, 0))
+        text_game_over = FONT_TITLE.render("Game Over", True, (255, 0, 0))
+        text_score = FONT_SCORE.render(f"Score: {score}", True, (255, 255, 255))
+        text_restart = FONT_OPTIONS.render("Pressione R para Reiniciar", True, (255, 255, 255))
+        text_exit = FONT_OPTIONS.render("Pressione ESC para Sair", 1, (255, 255, 255))
+
+        canvas.blit(text_game_over, (GAME_WIDTH//2 - text_game_over.get_width()//2, 200))
+        canvas.blit(text_score, (GAME_WIDTH//2 - text_score.get_width()//2, 300))
+        canvas.blit(text_restart, (GAME_WIDTH//2 - text_restart.get_width()//2, 400))
+        canvas.blit(text_exit, (GAME_WIDTH//2 - text_exit.get_width()//2, 470))
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    main()
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()
+
 
 if __name__ == "__main__":
     main()
