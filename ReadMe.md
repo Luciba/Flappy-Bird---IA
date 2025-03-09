@@ -39,7 +39,7 @@ python main.py
 
 ![Tela Inicial](imgs/Tela%20Inicial.PNG)
 <!-- ![Gameplay](images/gameplay.png) -->
-![Game Over](imgs\Game Over.PNG)
+![Game Over](imgs\Game%20Over.PNG)
 
 
 ## 🤖 Objetivo com IA
