@@ -37,7 +37,11 @@ python main.py
 ## 📷 Capturas de Tela
 (Tela inicial, gameplay e tela de game over ) (EM DESENVOLVIMENTO)
 
+<<<<<<< HEAD
 ![Tela Inicial](imgs/Tela%Inicial.PNG)
+=======
+![Tela Inicial](imgs/Tela Inicial.PNG)
+>>>>>>> b4744285ad3f4f9278c9f01ce0390a5738c82c16
 <!-- ![Gameplay](images/gameplay.png) -->
 ![Game Over](imgs/Game%Over.PNG)
 
