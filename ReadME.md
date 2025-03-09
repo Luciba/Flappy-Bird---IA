@@ -42,7 +42,7 @@ python main.py
 ![Game Over](imgs/Game%20Over.PNG)
 
 
-## 🤖 Objetivo com IA
+## 🤖 Objetivo com IA (EM DESENVOLVIMENTO)
 O jogo será integrado com NEAT, um algoritmo de evolução de redes neurais artificiais. O objetivo é que, ao longo das gerações, a IA aprenda estratégias eficazes para maximizar a pontuação, ajustando os pesos das redes neurais para melhorar a tomada de decisão.
 
 ## 🏛️ Licença
