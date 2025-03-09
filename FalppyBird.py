@@ -12,11 +12,12 @@ IMGS_BIRD = [
     pygame.transform.scale2x(pygame.image.load(os.path.join('imgs', 'bird2.png'))),
     pygame.transform.scale2x(pygame.image.load(os.path.join('imgs', 'bird3.png')))
 ]
+IMG_APP = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'Background.jpg')),(500,800))
 
 pygame.font.init()
 FONT_SCORE = pygame.font.SysFont('consolas', 40)
 FONT_TITLE = pygame.font.SysFont('arial', 60)
-FONT_OPTIONS = pygame.font.SysFont('arial', 50)
+FONT_OPTIONS = pygame.font.SysFont('arial', 30)
 
 class Bird:
     IMGS = IMGS_BIRD
@@ -178,67 +179,91 @@ def draw_screen(canvas, birds, pipes, floor, score):
 
 def main():
     canvas = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT))
-    birds = [Bird(230,250)]
-    pipes = [Pipe(700)]
-    floor = Floor(730)
-    score = 0
-    clock = pygame.time.Clock()
+    app(canvas)
+
+    while True:
+
+        birds = [Bird(230,250)]
+        pipes = [Pipe(700)]
+        floor = Floor(730)
+        score = 0
+        clock = pygame.time.Clock()
 
 
-    loop = True
-    while loop:
-        clock.tick(30)
+        loop = True
+        while loop:
+            clock.tick(30)
 
-        #ler as teclas
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                loop = False
-                pygame.quit()
-                quit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    for bird in birds:
-                        bird.jump()
+            #ler as teclas
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    loop = False
+                    pygame.quit()
+                    quit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        for bird in birds:
+                            bird.jump()
 
-        #mover as coisas
-        for bird in birds:
-            bird.move()
-        floor.move()
+            #mover as coisas
+            for bird in birds:
+                bird.move()
+            floor.move()
 
-        add_pipe = False
-        remove_pipes = []
-        for pipe in pipes:
+            add_pipe = False
+            remove_pipes = []
+            for pipe in pipes:
+                for i, bird in enumerate(birds):
+                    if pipe.collision(bird):
+                        birds.pop(i)
+                    if not pipe.passou and  bird.x > pipe.x:
+                        pipe.passou = True
+                        add_pipe = True
+                pipe.move()
+                if pipe.x + pipe.PIPE_TOP.get_width() <0:
+                    remove_pipes.append(pipe)
+            
+            if add_pipe:
+                score += 1
+                pipes.append(Pipe(600))
+            for pipe in remove_pipes:
+                pipes.remove(pipe)
+
             for i, bird in enumerate(birds):
-                if pipe.collision(bird):
+                if (bird.y + bird.image.get_height()) > floor.y or bird.y < 0:
                     birds.pop(i)
-                if not pipe.passou and  bird.x > pipe.x:
-                    pipe.passou = True
-                    add_pipe = True
-            pipe.move()
-            if pipe.x + pipe.PIPE_TOP.get_width() <0:
-                remove_pipes.append(pipe)
-        
-        if add_pipe:
-            score += 1
-            pipes.append(Pipe(600))
-        for pipe in remove_pipes:
-            pipes.remove(pipe)
 
-        for i, bird in enumerate(birds):
-            if (bird.y + bird.image.get_height()) > floor.y or bird.y < 0:
-                birds.pop(i)
+            draw_screen(canvas, birds, pipes, floor, score)
 
-        draw_screen(canvas, birds, pipes, floor, score)
-
-        if len(birds) == 0:
-            break
+            if len(birds) == 0:
+                break
 
 def app(canvas):
     loop = True
     while loop:
-        canvas.fill((0, 0, 0))
+        # canvas.fill((0, 0, 0))
+        canvas.blit(IMG_APP, (0,0))
         text_title = FONT_TITLE.render("Flappy", True, (255, 255, 255))
+        text_play = FONT_OPTIONS.render("Pressine ENTER para começar", 1, (255, 255, 255))
+        text_exit = FONT_OPTIONS.render("Pressione ESC para Sair", 1, (255, 255, 255))
+       
+        canvas.blit(text_title, (GAME_WIDTH//2 - text_title.get_width()//2, 10))
+        canvas.blit(text_play, (GAME_WIDTH//2 - text_play.get_width()//2, 350))
+        canvas.blit(text_exit, (GAME_WIDTH//2 - text_exit.get_width()//2, 420))
+        print(text_title.get_width())        
 
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    loop = False 
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()
 
 if __name__ == "__main__":
     main()
