@@ -1,9 +1,11 @@
 import pygame
 import os, random
 import neat
+import pickle 
 
 ia_playing = True
 generation = 0
+BEST_GENOME_FILE = "data/best_genome.pkl"
 
 GAME_WIDTH = 500
 GAME_HEIGHT = 800
@@ -197,8 +199,18 @@ def draw_screen(canvas, birds, pipes, floor, score):
     pygame.display.update()
 
 
+def save_best_genoma(genoma):
+    if not os.path.exists("data"):
+        os.makedirs("data")
 
+    with open(BEST_GENOME_FILE, "wb") as f:
+        pickle.dump(genoma, f)
 
+def load_best_genoma():
+    if os.path.exists(BEST_GENOME_FILE):
+        with open(BEST_GENOME_FILE, "rb") as f:
+            return pickle.load(f)
+    return None
 
 def main(genomas, config):
     canvas = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT))
@@ -210,6 +222,8 @@ def main(genomas, config):
     generation +=1
 
     if ia_playing:
+        best_genoma = load_best_genoma()
+        best_fitness = best_genoma.fitness if best_genoma else -float("inf")
         redes = []
         lista_genoma = []
         birds = []
@@ -308,10 +322,10 @@ def main(genomas, config):
 
         draw_screen(canvas, birds, pipes, floor, score)
 
-        # if not ia_playing:
-        #     if len(birds) == 0:
-        #         if not game_over(canvas, score):
-        #             break
+        for genoma in lista_genoma:
+            if genoma.fitness > best_fitness:
+                best_fitness = genoma.fitness
+                save_best_genoma(genoma)
 
 def app(canvas):
     loop = True
