@@ -1,5 +1,9 @@
 import pygame
 import os, random
+import neat
+
+ai_playing = True
+generation = 0
 
 GAME_WIDTH = 500
 GAME_HEIGHT = 800
@@ -23,6 +27,10 @@ pygame.font.init()
 FONT_SCORE = pygame.font.SysFont('consolas', 40)
 FONT_TITLE = pygame.font.SysFont('arial', 60)
 FONT_OPTIONS = pygame.font.SysFont('arial', 30)
+
+gameIcon = pygame.image.load(os.path.join('imgs', 'Matcholas_bike.PNG'))
+
+pygame.display.set_icon(gameIcon)
 
 class Bird:
     IMGS = IMGS_BIRD
@@ -139,7 +147,6 @@ class Pipe:
             return True
         else:
             return False
-
 
 
 class Floor:
