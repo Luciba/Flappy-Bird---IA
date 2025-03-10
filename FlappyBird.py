@@ -2,7 +2,7 @@ import pygame
 import os, random
 import neat
 
-ai_playing = True
+ia_playing = True
 generation = 0
 
 GAME_WIDTH = 500
@@ -149,7 +149,6 @@ class Pipe:
         base_point = bird_mask.overlap(base_mask, distance_base)
 
         if top_point or base_point:
-            death_sfx.play()
             return True
         else:
             return False
@@ -188,6 +187,11 @@ def draw_screen(canvas, birds, pipes, floor, score):
 
     text = FONT_SCORE.render(f"Score: {score}", 1, (255, 255, 255))
     canvas.blit(text, (GAME_WIDTH - 10 - text.get_width(), 10))
+
+    if ia_playing:
+        text = FONT_SCORE.render(f"Generation:{generation}", 1 , (255, 255, 255))
+        canvas.blit(text, (10, 10))
+
     floor.draw(canvas)
     pygame.display.update()
 
@@ -233,6 +237,7 @@ def main():
             for pipe in pipes:
                 for i, bird in enumerate(birds):
                     if pipe.collision(bird):
+                        death_sfx.play()
                         birds.pop(i)
                     if not pipe.passou and  bird.x > pipe.x:
                         pipe.passou = True
@@ -249,7 +254,9 @@ def main():
 
             for i, bird in enumerate(birds):
                 if (bird.y + bird.image.get_height()) > floor.y or bird.y < 0:
+                    death_sfx.play()
                     birds.pop(i)
+                    
 
             draw_screen(canvas, birds, pipes, floor, score)
 
