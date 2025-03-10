@@ -31,6 +31,7 @@ FONT_OPTIONS = pygame.font.SysFont('arial', 30)
 gameIcon = pygame.image.load(os.path.join('imgs', 'Matcholas_bike.PNG'))
 
 pygame.display.set_icon(gameIcon)
+pygame.display.set_caption("Flappy Matcholas")
 
 pygame.mixer.init()
 death_sfx = pygame.mixer.Sound(os.path.join("imgs", "anime-ahh.mp3"))
@@ -189,7 +190,7 @@ def draw_screen(canvas, birds, pipes, floor, score):
     canvas.blit(text, (GAME_WIDTH - 10 - text.get_width(), 10))
 
     if ia_playing:
-        text = FONT_SCORE.render(f"Generation:{generation}", 1 , (255, 255, 255))
+        text = FONT_SCORE.render(f"Gen: {generation}", 1 , (255, 255, 255))
         canvas.blit(text, (10, 10))
 
     floor.draw(canvas)
@@ -199,70 +200,118 @@ def draw_screen(canvas, birds, pipes, floor, score):
 
 
 
-def main():
+def main(genomas, config):
     canvas = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT))
-    app(canvas)
+    if not ia_playing:
+        app(canvas)
 
-    while True:
+    # while True:
+    global generation
+    generation +=1
 
-        birds = [Bird(230,250)]
-        pipes = [Pipe(700)]
-        floor = Floor(730)
-        score = 0
-        clock = pygame.time.Clock()
+    if ia_playing:
+        redes = []
+        lista_genoma = []
+        birds = []
+        for _, genoma in genomas:
+            rede = neat.nn.FeedForwardNetwork.create(genoma, config)
+            redes.append(rede)
+            genoma.fitness = 0
+            lista_genoma.append(genoma)
+            birds.append(Bird(230, 350))
+    else:
+        birds = [Bird(230, 350)]
+    
+    pipes = [Pipe(700)]
+    floor = Floor(730)
+    score = 0
+    clock = pygame.time.Clock()
 
 
-        loop = True
-        while loop:
-            clock.tick(30)
+    loop = True
+    while loop:
+        clock.tick(30)
 
-            #ler as teclas
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    loop = False
-                    pygame.quit()
-                    quit()
+        #ler as teclas
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                loop = False
+                pygame.quit()
+                quit()
+            if not ia_playing:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         for bird in birds:
                             bird.jump()
 
-            #mover as coisas
-            for bird in birds:
-                bird.move()
-            floor.move()
-
-            add_pipe = False
-            remove_pipes = []
-            for pipe in pipes:
-                for i, bird in enumerate(birds):
-                    if pipe.collision(bird):
-                        death_sfx.play()
-                        birds.pop(i)
-                    if not pipe.passou and  bird.x > pipe.x:
-                        pipe.passou = True
-                        add_pipe = True
-                pipe.move()
-                if pipe.x + pipe.PIPE_TOP.get_width() <0:
-                    remove_pipes.append(pipe)
-            
-            if add_pipe:
-                score += 1
-                pipes.append(Pipe(600))
-            for pipe in remove_pipes:
-                pipes.remove(pipe)
-
-            for i, bird in enumerate(birds):
-                if (bird.y + bird.image.get_height()) > floor.y or bird.y < 0:
-                    death_sfx.play()
-                    birds.pop(i)
-                    
-
-            draw_screen(canvas, birds, pipes, floor, score)
-
-            if len(birds) == 0:
+        pipe_index = 0
+        if len(birds) > 0:
+            if len(pipes) > 1 and birds[0].x > (pipes[0].x + pipes[0].PIPE_TOP.get_width()):
+                pipe_index = 1
+        else:
+            if not ia_playing:
                 if not game_over(canvas, score):
+                    loop = False
                     break
+            loop = False 
+            break
+
+        #mover as coisas
+        for i, bird in enumerate(birds):
+            bird.move()
+            #upgrade da fitness do matcholas
+            if ia_playing:
+                lista_genoma[i].fitness += 0.1
+                output = redes[i].activate((bird.y, abs(bird.y - pipes[pipe_index].height), abs(bird.y - pipes[pipe_index].pos_base)))
+                #-1 e 1// Se output > 0.5 o matcholas dá Grau
+                if output[0] > 0.5:
+                    bird.jump()
+        floor.move()
+
+        add_pipe = False
+        remove_pipes = []
+        for pipe in pipes:
+            for i, bird in enumerate(birds):
+                if pipe.collision(bird):
+                    if not ia_playing:
+                        death_sfx.play()
+                    birds.pop(i)
+                    if ia_playing:
+                        lista_genoma[i].fitness -= 1
+                        lista_genoma.pop(i)
+                        redes.pop(i)
+                if not pipe.passou and  bird.x > pipe.x:
+                    pipe.passou = True
+                    add_pipe = True
+            pipe.move()
+            if pipe.x + pipe.PIPE_TOP.get_width() <0:
+                remove_pipes.append(pipe)
+        
+        if add_pipe:
+            score += 1
+            pipes.append(Pipe(600))
+            if ia_playing:
+                for genoma in lista_genoma:
+                    genoma.fitness += 5
+        for pipe in remove_pipes:
+            pipes.remove(pipe)
+
+        for i, bird in enumerate(birds):
+            if (bird.y + bird.image.get_height()) > floor.y or bird.y < 0:
+                if not ia_playing:
+                    death_sfx.play()
+                birds.pop(i)
+                if ia_playing:
+                    lista_genoma.pop(i)
+                    redes.pop(i)
+                
+
+        draw_screen(canvas, birds, pipes, floor, score)
+
+        # if not ia_playing:
+        #     if len(birds) == 0:
+        #         if not game_over(canvas, score):
+        #             break
 
 def app(canvas):
     loop = True
@@ -314,11 +363,30 @@ def game_over(canvas, score):
                 quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-                    main()
+                    main(None, None)
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     quit()
+    return False
+
+def play(path_config):
+    config = neat.config.Config(neat.DefaultGenome,
+                                neat.DefaultReproduction,
+                                neat.DefaultSpeciesSet,
+                                neat.DefaultStagnation,
+                                path_config)
+    
+    population = neat.Population(config)
+    population.add_reporter(neat.StdOutReporter(True))
+    population.add_reporter(neat.StatisticsReporter())
+
+    if ia_playing:
+        population.run(main, 50)
+    else:
+        main(None, None)
 
 
 if __name__ == "__main__":
-    main()
+    path = os.path.dirname(__file__)
+    path_config = os.path.join(path, 'config.txt')
+    play(path_config)
