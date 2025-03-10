@@ -32,6 +32,11 @@ gameIcon = pygame.image.load(os.path.join('imgs', 'Matcholas_bike.PNG'))
 
 pygame.display.set_icon(gameIcon)
 
+pygame.mixer.init()
+death_sfx = pygame.mixer.Sound(os.path.join("imgs", "anime-ahh.mp3"))
+
+
+
 class Bird:
     IMGS = IMGS_BIRD
 
@@ -144,6 +149,7 @@ class Pipe:
         base_point = bird_mask.overlap(base_mask, distance_base)
 
         if top_point or base_point:
+            death_sfx.play()
             return True
         else:
             return False
@@ -291,6 +297,7 @@ def game_over(canvas, score):
         canvas.blit(text_score, (GAME_WIDTH//2 - text_score.get_width()//2, 300))
         canvas.blit(text_restart, (GAME_WIDTH//2 - text_restart.get_width()//2, 400))
         canvas.blit(text_exit, (GAME_WIDTH//2 - text_exit.get_width()//2, 470))
+
 
         pygame.display.update()
 
